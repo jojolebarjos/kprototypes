@@ -1,11 +1,8 @@
 
 import numpy as np
 
-from numba import jit
 
-
-@jit(nopython=True)
-def do_iteration(
+def fit(
     numerical_values,
     categorical_values,
     numerical_centroids,
@@ -13,45 +10,95 @@ def do_iteration(
     numerical_similarity,
     categorical_similarity,
     gamma,
-    categorical_offsets,
-    clustership,
-    cluster_count,
-    cluster_sum,
-    cluster_frequency,
+    n_iterations,
+    random_state,
+    verbose,
 ):
-
+    """Two-step optimization."""
+    
     n_points, n_categorical_features = categorical_values.shape
+    n_clusters, _  = numerical_centroids.shape
 
-    moves = 0
-    for i in range(n_points):
+    clustership = None
+    for iteration in range(n_iterations):
+        old_clustership = clustership
 
-        numerical_value = numerical_values[i]
-        categorical_value = categorical_values[i]
+        # Assign points to closest clusters
+        clustership, cost = predict(
+            numerical_values,
+            categorical_values,
+            numerical_centroids,
+            categorical_centroids,
+            numerical_similarity,
+            categorical_similarity,
+            gamma,
+        )
 
-        # TODO probably need to pass in-place? or just don't use vectorized stuff
-        numerical_cost = numerical_similarity(numerical_value, numerical_centroids)
-        categorical_cost = categorical_similarity(numerical_value, categorical_centroids)
-        cost = numerical_cost + gamma * categorical_cost
+        # Check for convergence
+        if old_clustership is not None:
+            moves = (old_labels != labels).sum()
+            if verbose:
+                print(f'#{iteration}: cost={cost}, moves={moves}')
+            if moves == 0: # TODO abort if cost > old_cost?
+                break
 
-        old_cluster = clustership[i]
-        new_cluster = cost.argmin()
+        # Count points in each cluster
+        masks = clustership[:, None] == np.arange(n_clusters)[None, :]
+        counts = masks.sum(axis=0)
 
-        if old_cluster != new_cluster:
+        # Update clusters
+        for k in range(n_clusters):
+            mask = masks[k]
+            count = counts[k]
 
-            # Update point count for both clusters
-            cluster_count[old_cluster] -= 1
-            cluster_count[new_cluster] += 1
+            # If cluster is empty, reinitialize with a random point from largest cluster
+            if count == 0:
+                largest_cluster = counts.argmax()
+                mask = clustership == largest_cluster
+                available_points = np.arange(n_points)[mask]
+                point = random_state.choice(available_points)
+                numerical_centroids[k] = numerical_values[point]
+                categorical_centroids[k] = categorical_values[point]
 
-            # Update numerical features sums for both clusters
-            cluster_sum[old_cluster] -= numerical_value
-            cluster_sum[new_cluster] += numerical_value
+            else:
 
-            # Update categorical values counts for both clusters
-            for j in range(n_categorical_features):
-                offset = categorical_offsets[j] + categorical_value[j]
-                cluster_frequency[old_cluster, offset] -= 1
-                cluster_frequency[new_cluster, offset] += 1
+                # Numerical centroid attributes are set to mean
+                masked_numerical_values = numerical_values[mask]
+                numerical_centroids[k] = masked_numerical_values.sum(axis=0) / count
+                
+                # Categorical centroid attributes are set to most frequent value
+                masked_categorical_values = categorical_values[mask]
+                for j in range(n_categorical_features):
+                    frequency = np.bincount(masked_categorical_values[:, j])
+                    categorical_centroids[k, j] = frequency.argmax()
+    
+    return clustership
 
-            moves += 1
 
-    return moves
+def predict(
+    numerical_values,
+    categorical_values,
+    numerical_centroids,
+    categorical_centroids,
+    numerical_similarity,
+    categorical_similarity,
+    gamma,
+    return_cost=False,
+):
+    """Assign points to closest clusters."""
+
+    n_points, _ = numerical_values.shape
+
+    # Compute weighted similarities
+    numerical_costs = numerical_similarity(numerical_values, numerical_centroids)
+    categorical_costs = categorical_similarity(categorical_values, categorical_centroids)
+    costs = numerical_costs + gamma * categorical_costs
+
+    # Assign to closest clusters
+    clustership = np.argmin(costs, axis=1)
+
+    # Compute cost
+    if return_cost:
+        cost = costs[np.arange(n_points), clustership].sum()
+        return clustership, cost
+    return clustership

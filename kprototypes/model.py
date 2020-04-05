@@ -1,93 +1,118 @@
 
 import numpy as np
-import pandas as pd
 
-from .optimization import do_iteration
+from sklearn.utils import check_array, check_random_state
 
-
-def train(X, **kwargs):
-    raise NotImplementedError()
-
-
-def train_dataframe(df, **kwargs):
-    raise NotImplementedError()
+from .similarity import check_similarity
+from .initialization import check_initialization
+from .optimization import fit, predict
 
 
-def train_arrays(
-    numerical_values,
-    categorical_values,
-    *,
-    n_clusters,
-    centroid_initialization,
-    numerical_similarity,
-    categorical_similarity,
-    gamma,
-    n_iterations,
-    random_state,
-    verbose,
-):
+class KPrototypes:
+    """K-Prototypes clustering.
 
-    # TODO default values?
-    # TODO verbosity
+    ...
 
-    n_points, n_numerical_features = numerical_values.shape
-    _, n_categorical_features = categorical_values.shape
+    """
 
-    # Initialize centroids
-    numerical_centroids, categorical_centroids = centroid_initialization(
-        numerical_values,
-        categorical_values,
-        n_clusters,
-        numerical_similarity,
-        categorical_similarity,
-        random_state,
-    )
+    def __init__(self,
+        n_clusters=8,
+        initialization=None,
+        numerical_similarity=None,
+        categorical_similarity=None,
+        gamma=None,
+        n_iterations=100,
+        random_state=None,
+        verbose=0,
+    ):
 
-    # Assign points to clusters
-    # TODO paper does update clusters after each assignment
-    clustership = ...
+        # Resolve string-based properties
+        self.initialization = check_initialization(initialization)
+        self.numerical_similarity = check_similarity(numerical_similarity)
+        self.categorical_similarity = check_similarity(categorical_similarity)
 
-    # Keep track of point count per cluster
-    cluster_counts = np.bincount(clustership, minlength=n_clusters)
+        # Gamma and random state will be resolved when fitted
+        self.gamma = gamma
+        self.random_state = random_state
 
-    # Keep track of numerical features sums per cluster
-    one_hot = np.eye(n_clusters, dtype=np.bool)[clustership]
-    cluster_sums = numerical_values[one_hot].sum(axis=0)
+        # Store other arguments, ensuring type
+        self.n_clusters = int(n_clusters)
+        self.n_iterations = int(n_iterations)
+        self.verbose = bool(verbose)
+        
+        # Parameters are not yet fitted
+        self.true_gamma = None
+        self.numerical_centroids = None
+        self.categorical_centroids = None
 
-    # Enumerate categorical values
-    categorical_counts = categorical_values.max(axis=0) + 1
-    categorical_offsets = np.concatenate([[0], categorical_counts.cumsum()])
-    n_categorical_values = categorical_offsets[-1]
+    def fit(self, numerical_values, categorical_values):
 
-    # Keep track of categorical values counts per cluster
-    # Note: this implementation packs all possible values in a flat array
-    # TODO optimize this (possibly just jit)
-    cluster_frequencies = np.zeros((n_clusters, n_categorical_values), dtype=np.int32)
-    for i in range(n_points):
-        for j in range(n_categorical_features):
-            offset = categorical_offsets[j] + categorical_values[i, j]
-            cluster_frequencies[k, offset] += 1
+        # Regular fit, discarding cluster assignment
+        self.fit_predict(numerical_values, categorical_values)
+        return self
 
-    # Run for several epochs
-    for iteration in range(n_iterations):
-        moves = do_iteration(
+    def fit_predict(self, numerical_values, categorical_values):
+
+        # Check input
+        # TODO maybe ensure_min_features=0?
+        numerical_values = check_array(
+            numerical_values,
+            dtype=[np.float32, np.float64],
+        )
+        categorical_values = check_array(
+            categorical_values,
+            dtype=[np.int32, np.int64],
+        )
+
+        # Estimate gamma, if not specified
+        if self.gamma is None:
+            gamma = 0.5 * numerical_values.std()
+        else:
+            gamma = float(self.gamma)
+
+        # Resolve random state
+        random_state = check_random_state(self.random_state)
+
+        # Initialize clusters
+        numerical_centroids, categorical_centroids = self.initialization(
+            numerical_values,
+            categorical_values,
+            self.n_clusters,
+            self.numerical_similarity,
+            self.categorical_similarity,
+            random_state,
+            self.verbose,
+        )
+
+        # Train clusters
+        clustership = fit(
             numerical_values,
             categorical_values,
             numerical_centroids,
             categorical_centroids,
-            numerical_similarity,
-            categorical_similarity,
+            self.numerical_similarity,
+            self.categorical_similarity,
             gamma,
-            categorical_offsets,
-            clustership,
-            cluster_counts,
-            cluster_sums,
-            cluster_frequencies,
+            self.n_iterations,
+            random_state,
+            self.verbose,
         )
 
-    return (
-        numerical_centroids,
-        categorical_centroids,
-        clustership,
-        # TODO moves? iterations? costs?
-    )
+        # Save result
+        self.true_gamma = gamma
+        self.numerical_centroids = numerical_centroids
+        self.categorical_centroids = categorical_centroids
+
+        return clustership
+
+    def predict(self, numerical_values, categorical_values):
+
+        return predict(
+            numerical_values,
+            categorical_values,
+            self.numerical_centroids,
+            self.categorical_centroids,
+            self.numerical_similarity,
+            self.categorical_similarity,
+            self.true_gamma,
+        )
