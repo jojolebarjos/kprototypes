@@ -9,6 +9,8 @@ def check_similarity(similarity):
         return similarity
     if similarity == 'euclidean':
         return euclidean_similarity
+    if similarity == 'manhattan':
+        return manhattan_similarity
     if similarity == 'matching':
         return matching_similarity
     raise KeyError(similarity)
@@ -18,6 +20,12 @@ def euclidean_similarity(a, b):
     """Euclidean distance."""
 
     return np.sum((a - b) ** 2, axis=-1)
+
+
+def manhattan_similarity(a, b):
+    """Manhattan distance."""
+
+    return np.abs(a - b).sum(axis=-1)
 
 
 def matching_similarity(a, b):
