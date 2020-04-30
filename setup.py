@@ -25,6 +25,7 @@ setup(
         'clustering',
         'k-prototypes',
         'k-means',
+        'k-modes',
     ],
 
     classifiers = [

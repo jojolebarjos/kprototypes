@@ -32,19 +32,20 @@ def fit(
             numerical_similarity,
             categorical_similarity,
             gamma,
+            return_cost=True,
         )
 
         # Check for convergence
         if old_clustership is not None:
-            moves = (old_labels != labels).sum()
+            moves = (old_clustership != clustership).sum()
             if verbose:
                 print(f'#{iteration}: cost={cost}, moves={moves}')
             if moves == 0: # TODO abort if cost > old_cost?
                 break
 
         # Count points in each cluster
-        masks = clustership[:, None] == np.arange(n_clusters)[None, :]
-        counts = masks.sum(axis=0)
+        masks = clustership[None, :] == np.arange(n_clusters)[:, None]
+        counts = masks.sum(axis=1)
 
         # Update clusters
         for k in range(n_clusters):
@@ -90,8 +91,8 @@ def predict(
     n_points, _ = numerical_values.shape
 
     # Compute weighted similarities
-    numerical_costs = numerical_similarity(numerical_values, numerical_centroids)
-    categorical_costs = categorical_similarity(categorical_values, categorical_centroids)
+    numerical_costs = numerical_similarity(numerical_centroids[None, :], numerical_values[:, None])
+    categorical_costs = categorical_similarity(categorical_centroids[None, :], categorical_values[:, None])
     costs = numerical_costs + gamma * categorical_costs
 
     # Assign to closest clusters
