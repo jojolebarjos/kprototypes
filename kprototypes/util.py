@@ -4,11 +4,11 @@ from collections import Counter
 import numpy as np
 
 
-class CategoricalTransformer:
+UNKNOWN = object()
 
-    UNKNOWN = object()
 
-    def __init__(self, min_count=0, allow_unknown=True, nan_as_unknown=True):
+class SingleCategoricalTransformer:
+    def __init__(self, *, min_count=0, allow_unknown=True, nan_as_unknown=True):
 
         # Keep parameters
         if min_count > 0 and not allow_unknown:
@@ -45,7 +45,7 @@ class CategoricalTransformer:
         table = [v for v, c in counter.items() if c >= self.min_count]
         if self.allow_unknown:
             mapping = {v: i + 1 for i, v in enumerate(table)}
-            table = [self.UNKNOWN, *table]
+            table = [UNKNOWN, *table]
         else:
             mapping = {v: i for i, v in enumerate(table)}
 
@@ -76,3 +76,33 @@ class CategoricalTransformer:
 
     def inverse_transform(self, indices):
         return self._table[indices]
+
+
+class CategoricalTransformer:
+    def __init__(self, **kwargs):
+        self._kwargs = kwargs
+        self._transformers = []
+
+    def fit(self, values):
+        _, n_columns = values.shape
+        transformers = []
+        for i in range(n_columns):
+            transformer = SingleCategoricalTransformer(**self._kwargs)
+            transformer.fit(values[:, i])
+            transformers.append(transformer)
+        self._transformers = transformers
+        return self
+
+    def fit_transform(self, values):
+        self.fit(values)
+        return self.transform(values)
+
+    def transform(self, values):
+        indices = [t.transform(values[:, i]) for i, t in enumerate(self._transformers)]
+        indices = np.stack(indices, axis=1)
+        return indices
+
+    def inverse_transform(self, indices):
+        values = [t.inverse_transform(indices[:, i]) for i, t in enumerate(self._transformers)]
+        values = np.stack(values, axis=1)
+        return values

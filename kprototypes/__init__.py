@@ -21,5 +21,6 @@ from .model import (
 )
 
 from .util import (
+    SingleCategoricalTransformer,
     CategoricalTransformer,
 )
