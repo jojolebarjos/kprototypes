@@ -1,9 +1,9 @@
 
-from .similarity import (
-    check_similarity,
-    euclidean_similarity,
-    manhattan_similarity,
-    matching_similarity,
+from .distance import (
+    check_distance,
+    euclidean_distance,
+    manhattan_distance,
+    matching_distance,
 )
 
 from .initialization import (

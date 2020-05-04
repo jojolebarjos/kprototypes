@@ -3,7 +3,7 @@ import numpy as np
 
 from sklearn.utils import check_array, check_random_state
 
-from .similarity import check_similarity
+from .distance import check_distance
 from .initialization import check_initialization
 from .optimization import fit, predict
 
@@ -18,8 +18,8 @@ class KPrototypes:
     def __init__(self,
         n_clusters=8,
         initialization=None,
-        numerical_similarity=None,
-        categorical_similarity=None,
+        numerical_distance=None,
+        categorical_distance=None,
         gamma=None,
         n_iterations=100,
         random_state=None,
@@ -28,8 +28,8 @@ class KPrototypes:
 
         # Resolve string-based properties
         self.initialization = check_initialization(initialization)
-        self.numerical_similarity = check_similarity(numerical_similarity)
-        self.categorical_similarity = check_similarity(categorical_similarity)
+        self.numerical_distance = check_distance(numerical_distance)
+        self.categorical_distance = check_distance(categorical_distance)
 
         # Gamma and random state will be resolved when fitted
         self.gamma = gamma
@@ -78,8 +78,9 @@ class KPrototypes:
             numerical_values,
             categorical_values,
             self.n_clusters,
-            self.numerical_similarity,
-            self.categorical_similarity,
+            self.numerical_distance,
+            self.categorical_distance,
+            gamma,
             random_state,
             self.verbose,
         )
@@ -90,8 +91,8 @@ class KPrototypes:
             categorical_values,
             numerical_centroids,
             categorical_centroids,
-            self.numerical_similarity,
-            self.categorical_similarity,
+            self.numerical_distance,
+            self.categorical_distance,
             gamma,
             self.n_iterations,
             random_state,
@@ -112,7 +113,7 @@ class KPrototypes:
             categorical_values,
             self.numerical_centroids,
             self.categorical_centroids,
-            self.numerical_similarity,
-            self.categorical_similarity,
+            self.numerical_distance,
+            self.categorical_distance,
             self.true_gamma,
         )

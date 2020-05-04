@@ -7,8 +7,8 @@ def fit(
     categorical_values,
     numerical_centroids,
     categorical_centroids,
-    numerical_similarity,
-    categorical_similarity,
+    numerical_distance,
+    categorical_distance,
     gamma,
     n_iterations,
     random_state,
@@ -18,6 +18,8 @@ def fit(
     
     n_points, n_categorical_features = categorical_values.shape
     n_clusters, _  = numerical_centroids.shape
+
+    # TODO maybe allow keyboard interrupt?
 
     clustership = None
     for iteration in range(n_iterations):
@@ -29,8 +31,8 @@ def fit(
             categorical_values,
             numerical_centroids,
             categorical_centroids,
-            numerical_similarity,
-            categorical_similarity,
+            numerical_distance,
+            categorical_distance,
             gamma,
             return_cost=True,
         )
@@ -38,7 +40,7 @@ def fit(
         # Check for convergence
         if old_clustership is not None:
             moves = (old_clustership != clustership).sum()
-            if verbose:
+            if verbose > 0:
                 print(f'#{iteration}: cost={cost}, moves={moves}')
             if moves == 0: # TODO abort if cost > old_cost?
                 break
@@ -72,6 +74,11 @@ def fit(
                 for j in range(n_categorical_features):
                     frequency = np.bincount(masked_categorical_values[:, j])
                     categorical_centroids[k, j] = frequency.argmax()
+
+    # Report non-convergence
+    else:
+        if self.verbose > 0:
+            print(f'Optimization did not converge after {n_iterations} iterations')
     
     return clustership
 
@@ -81,8 +88,8 @@ def predict(
     categorical_values,
     numerical_centroids,
     categorical_centroids,
-    numerical_similarity,
-    categorical_similarity,
+    numerical_distance,
+    categorical_distance,
     gamma,
     return_cost=False,
 ):
@@ -90,9 +97,9 @@ def predict(
 
     n_points, _ = numerical_values.shape
 
-    # Compute weighted similarities
-    numerical_costs = numerical_similarity(numerical_centroids[None, :], numerical_values[:, None])
-    categorical_costs = categorical_similarity(categorical_centroids[None, :], categorical_values[:, None])
+    # Compute weighted distances
+    numerical_costs = numerical_distance(numerical_centroids[None, :], numerical_values[:, None])
+    categorical_costs = categorical_distance(categorical_centroids[None, :], categorical_values[:, None])
     costs = numerical_costs + gamma * categorical_costs
 
     # Assign to closest clusters

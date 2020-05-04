@@ -1,6 +1,8 @@
 
 import numpy as np
 
+from sklearn.neighbors import KernelDensity
+
 
 def check_initialization(initialization):
     if initialization is None:
@@ -9,16 +11,43 @@ def check_initialization(initialization):
         return initialization
     if initialization == 'random':
         return random_initialization
-    # TODO other initializations
+    if initialization == 'frequency':
+        return frequency_initialization
+    if isinstance(initialization, (tuple, list)):
+        assert len(initialization) == 2
+        return _explicit_initialization_factory(*initialization)
     raise KeyError(initialization)
+
+
+def _explicit_initialization_factory(numerical_centroids, categorical_centroids):
+    """Create dummy initialization method, returning precomputed centroids."""
+
+    # TODO check dtype and shape
+
+    def initialization(
+        numerical_values,
+        categorical_values,
+        n_clusters,
+        numerical_distance,
+        categorical_distance,
+        gamma,
+        random_state,
+        verbose,
+    ):
+        assert numerical_centroids.shape[1] == n_clusters
+        assert categorical_centroids.shape[1] == n_clusters
+        return numerical_centroids, categorical_centroids
+
+    return initialization
 
 
 def random_initialization(
     numerical_values,
     categorical_values,
     n_clusters,
-    numerical_similarity,
-    categorical_similarity,
+    numerical_distance,
+    categorical_distance,
+    gamma,
     random_state,
     verbose,
 ):
@@ -41,40 +70,46 @@ def random_initialization(
     return numerical_centroids, categorical_centroids
 
 
-def huang_initialization(
+# TODO "Extensions to the k-modes algorithm for clustering large data sets with categorical values" by Huang (1998)?
+
+
+def _numerical_density(values):
+    """Estimate density of a continous random variable."""
+
+    kde = KernelDensity()
+    kde.fit(values)
+    return kde.score_samples(values)
+
+
+def _categorical_density(values):
+    """Estimate density of a discrete random variable."""
+
+    n_points, n_features = values.shape
+    densities = np.zeros((n_points, n_features), dtype=np.float32)
+    for j in range(n_features):
+        frequencies = np.bincount(values[:, j])
+        frequencies = frequencies.astype(np.float32)
+        frequencies /= n_points
+        densities[:, j] = frequencies[values[:, j]]
+    return densities
+
+
+def frequency_initialization(
     numerical_values,
     categorical_values,
     n_clusters,
-    numerical_similarity,
-    categorical_similarity,
+    numerical_distance,
+    categorical_distance,
+    gamma,
     random_state,
     verbose,
 ):
     """Frequency-based initialization.
 
-    Select points that are the most representative of frequent features.
+    ...
 
-    Based on "Extensions to the k-modes algorithm for clustering large data
-    sets with categorical values" by Huang (1998).
-
-    """
-
-    raise NotImplementedError()
-
-
-def cao_initialization(
-    numerical_values,
-    categorical_values,
-    n_clusters,
-    numerical_similarity,
-    categorical_similarity,
-    random_state,
-    verbose,
-):
-    """Cao et al. initialization.
-
-    Based on "A new initialization method for categorical data clustering" by
-    Cao et al. (2009).
+    This is an extension for mixed values of "A new initialization method for
+    categorical data clustering" by Cao et al. (2009).
 
     """
 
@@ -92,31 +127,36 @@ def cao_initialization(
         dtype=categorical_values.dtype,
     )
 
-    # Compute pointwise density for categorical values
-    # TODO Should take into account numerical features as well...
-    #      Maybe gamma-weighted sum, using distance to mean for numericals?
-    density = np.zeros(n_points, dtype=np.int32)
-    for j in range(n_categorical_features):
-        categorical_value = categorical_values[:, j]
-        frequency = np.bincount(categorical_value)
-        density += frequency[categorical_value]
-    density = density.astype(np.float32) / (n_points * n_categorical_features)
+    # Estimate probability of each sample
+    densities = (
+        _numerical_density(numerical_values) +
+        _categorical_density(categorical_values)
+    )
 
-    # First cluster is most frequent point
-    point = np.argmax(density)
-    numerical_centroids[0] = numerical_values[point]
-    categorical_centroids[0] = categorical_values[point]
+    # First cluster is most likely point
+    index = np.argmax(densities)
+    numerical_centroids[0] = numerical_values[index]
+    categorical_centroids[0] = categorical_values[index]
 
     # Then, choose the most dissimilar point at each step, with respect to current cluster set
     for k in range(1, n_clusters):
-        raise NotImplementedError()
-        costs = categorical_similarity(
+
+        # Compute distance w.r.t. already initialized centroids
+        numerical_costs = numerical_distance(
+            numerical_values[:, None],
+            numerical_centroids[None, :k]
+        )
+        categorical_costs = categorical_distance(
             categorical_values[:, None],
             categorical_centroids[None, :k]
         )
-        weighted_costs = costs * density[:, None]
-        min_weighted_costs = weighted_costs.min(axis=1)
-        point = categorical_values[np.argmax(min_weighted_costs)]
-        categorical_centroids[k] = point
+        costs = numerical_costs + gamma * categorical_costs
 
-    return categorical_centroids
+        # Maximize minimum distance (i.e. ensure largest margin)
+        weighted_costs = costs * densities[:, None]
+        min_weighted_costs = weighted_costs.min(axis=1)
+        index = np.argmax(min_weighted_costs)
+        numerical_centroids[k] = numerical_values[index]
+        categorical_centroids[k] = categorical_values[index]
+
+    return numerical_centroids, categorical_centroids
