@@ -63,6 +63,7 @@ def random_initialization(
     n_points, _ = numerical_values.shape
     assert n_points >= n_clusters
 
+    # TODO need to discard duplicates?
     indices = random_state.permutation(n_points)
     selected_indices = indices[:n_clusters]
     numerical_centroids = numerical_values[selected_indices]
@@ -76,21 +77,27 @@ def random_initialization(
 def _numerical_density(values):
     """Estimate density of a continous random variable."""
 
-    kde = KernelDensity()
-    kde.fit(values)
-    return kde.score_samples(values)
+    n_points, n_features = values.shape
+    densities = np.zeros((n_points, n_features), dtype=np.float32)
+    for j in range(n_features):
+        v = values[:, j, None]
+        kde = KernelDensity()
+        kde.fit(v)
+        log_densities = kde.score_samples(v)
+        densities[:, j] = np.exp(log_densities)
+    return densities
 
 
 def _categorical_density(values):
     """Estimate density of a discrete random variable."""
 
     n_points, n_features = values.shape
-    densities = np.zeros((n_points, n_features), dtype=np.float32)
+    densities = np.zeros((n_points, n_features), dtype=np.int32)
     for j in range(n_features):
         frequencies = np.bincount(values[:, j])
-        frequencies = frequencies.astype(np.float32)
-        frequencies /= n_points
         densities[:, j] = frequencies[values[:, j]]
+    densities = densities.astype(np.float32)
+    densities /= n_points
     return densities
 
 
@@ -127,14 +134,18 @@ def frequency_initialization(
         dtype=categorical_values.dtype,
     )
 
-    # Estimate probability of each sample
-    densities = (
-        _numerical_density(numerical_values) +
+    # Estimate probability of each sample and each feature
+    # TODO should maybe stick to log-space for stability?
+    densities = np.concatenate([
+        _numerical_density(numerical_values),
         _categorical_density(categorical_values)
-    )
+    ], axis=1)
+
+    # Mean density is used as weight
+    weights = densities.mean(axis=1)
 
     # First cluster is most likely point
-    index = np.argmax(densities)
+    index = np.argmax(weights)
     numerical_centroids[0] = numerical_values[index]
     categorical_centroids[0] = categorical_values[index]
 
@@ -153,7 +164,7 @@ def frequency_initialization(
         costs = numerical_costs + gamma * categorical_costs
 
         # Maximize minimum distance (i.e. ensure largest margin)
-        weighted_costs = costs * densities[:, None]
+        weighted_costs = costs * weights[:, None]
         min_weighted_costs = weighted_costs.min(axis=1)
         index = np.argmax(min_weighted_costs)
         numerical_centroids[k] = numerical_values[index]

@@ -2,6 +2,13 @@
 import numpy as np
 
 
+def _iterations(n_iterations):
+    i = 0
+    while n_iterations < 1 or i < n_iterations:
+        yield i
+        i += 1
+
+
 def fit(
     numerical_values,
     categorical_values,
@@ -22,7 +29,7 @@ def fit(
     # TODO maybe allow keyboard interrupt?
 
     clustership = None
-    for iteration in range(n_iterations):
+    for iteration in _iterations(n_iterations):
         old_clustership = clustership
 
         # Assign points to closest clusters
@@ -77,7 +84,7 @@ def fit(
 
     # Report non-convergence
     else:
-        if self.verbose > 0:
+        if verbose > 0:
             print(f'Optimization did not converge after {n_iterations} iterations')
     
     return clustership
