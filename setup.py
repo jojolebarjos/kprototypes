@@ -47,8 +47,10 @@ setup(
     ],
 
     install_requires = [
+        'fastkde',
         'numba',
         'numpy',
+        'scikit-learn',
     ]
 
 )

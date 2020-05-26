@@ -1,8 +1,6 @@
 
 import numpy as np
 
-from sklearn.neighbors import KernelDensity
-
 
 def check_initialization(initialization):
     if initialization is None:
@@ -74,17 +72,49 @@ def random_initialization(
 # TODO "Extensions to the k-modes algorithm for clustering large data sets with categorical values" by Huang (1998)?
 
 
-def _numerical_density(values):
+# TODO histogram-based kde
+
+
+def _numerical_density_sklearn(values):
+    """Estimate probability density function using gaussian kernel.
+
+    Requires `scikit-learn`.
+
+    """
+    
+    from sklearn.neighbors import KernelDensity
+    
+    v = values[:, None]
+    kde = KernelDensity()
+    # TODO randomly subsample if too large?
+    kde.fit(v)
+    log_densities = kde.score_samples(v)
+    densities = np.exp(log_densities)
+    return densities
+
+
+def _numerical_density_fastkde(values):
+    """Estimate probability density function using a fast approximation.
+
+    Requires `fastKDE`, as proposed by O'Brien et al. in "A fast and objective
+    multidimensional kernel density estimation method: fastKDE".
+
+    """
+
+    from fastkde import fastKDE
+
+    pdf, axe = fastKDE.pdf(values)
+    densities = np.interp(values, axe, pdf, left=0, right=0)
+    return densities
+
+
+def _numerical_density(values, method='fast'):
     """Estimate density of a continous random variable."""
 
     n_points, n_features = values.shape
     densities = np.zeros((n_points, n_features), dtype=np.float32)
     for j in range(n_features):
-        v = values[:, j, None]
-        kde = KernelDensity()
-        kde.fit(v)
-        log_densities = kde.score_samples(v)
-        densities[:, j] = np.exp(log_densities)
+        densities[:, j] = _numerical_density_fastkde(values[:, j])
     return densities
 
 
