@@ -61,3 +61,11 @@ Both [Huang (1997)](#1) and ...
         Yanlin Zheng, Zhe Wang, Zhiqiang Ma and Libiao Zhang
     </li>
 </ol>
+
+
+## Changelog
+
+ * 0.1.1 - 2020-06-03
+    * Add clean initialization procedures
+ * 0.1.0 - 2020-05-04
+    * Initial version
