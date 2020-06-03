@@ -29,6 +29,7 @@ def fit(
     # TODO maybe allow keyboard interrupt?
 
     clustership = None
+    cost = np.inf
     for iteration in _iterations(n_iterations):
         old_clustership = clustership
 
@@ -87,7 +88,7 @@ def fit(
         if verbose > 0:
             print(f'Optimization did not converge after {n_iterations} iterations')
     
-    return clustership
+    return clustership, cost
 
 
 def predict(

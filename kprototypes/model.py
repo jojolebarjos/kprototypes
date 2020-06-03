@@ -44,6 +44,7 @@ class KPrototypes:
         self.true_gamma = None
         self.numerical_centroids = None
         self.categorical_centroids = None
+        self.cost = None
 
     def fit(self, numerical_values, categorical_values):
 
@@ -86,7 +87,7 @@ class KPrototypes:
         )
 
         # Train clusters
-        clustership = fit(
+        clustership, cost = fit(
             numerical_values,
             categorical_values,
             numerical_centroids,
@@ -103,6 +104,7 @@ class KPrototypes:
         self.true_gamma = gamma
         self.numerical_centroids = numerical_centroids
         self.categorical_centroids = categorical_centroids
+        self.cost = cost
 
         return clustership
 
