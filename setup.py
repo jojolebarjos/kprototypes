@@ -47,7 +47,8 @@ setup(
     ],
 
     install_requires = [
-        'fastkde',
+        #'cython',
+        #'fastkde', # TODO wait until broken setup is solved
         'numba',
         'numpy',
         'scikit-learn',

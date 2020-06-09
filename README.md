@@ -8,6 +8,22 @@ Also, for completeness, note that a well-known Python implementation is
 available [here](https://github.com/nicodv/kmodes).
 
 
+## Installation
+
+Install from source, to ensure latest version:
+
+```
+pip install git+https://gitlab.com/jojolebarjos/kprototypes.git
+```
+
+`fastkde` is an optional dependencies, required by the frequency-based initialization:
+
+```
+pip install cython numpy scipy
+pip install fastkde
+```
+
+
 ## References
 
 <ol>
