@@ -27,6 +27,8 @@ release = '0.1.2'
 
 # -- General configuration ---------------------------------------------------
 
+master_doc = 'index'
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -52,7 +54,6 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-#html_theme = 'alabaster'
 
 html_show_copyright = False
 
