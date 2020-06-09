@@ -8,38 +8,6 @@ Also, for completeness, note that a well-known Python implementation is
 available [here](https://github.com/nicodv/kmodes).
 
 
-## Design choices
-
-...
-
-
-### Public interface
-
-A common framework for machine learning in Python is
-[scikit-learn](https://scikit-learn.org/stable/index.html), which provides a
-consistent [API](https://scikit-learn.org/stable/modules/classes.html) for
-components. A natural choice would be therefore to implement the
-[cluster mixin](https://scikit-learn.org/stable/modules/generated/sklearn.base.ClusterMixin.html).
-However, mixed data is not easily represented using NumPy arrays. A common
-workaround is to use a Pandas dataframe, as proposed by the experimental
-[OpenML](https://openml.org/) support [function](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_openml.html).
-
-In order to tie input format to dataframes, k-prototypes methods accept two
-arrays, a floating-point one and a integer one. Feature preprocessing,
-including categorical values encoding, is not handled by the core algorithm.
-Helpers are provided, though.
-
-
-### Optimization strategy
-
-Both [Huang (1997)](#1) and ...
-
-
-### Cluster initialization
-
-...
-
-
 ## References
 
 <ol>
