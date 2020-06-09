@@ -1,0 +1,6 @@
+fastkde
+numba
+numpy
+scikit-learn
+sphinx
+sphinx-rtd-theme
