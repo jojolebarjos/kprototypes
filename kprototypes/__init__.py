@@ -9,6 +9,7 @@ from .distance import (
 from .initialization import (
     check_initialization,
     random_initialization,
+    frequency_initialization,
 )
 
 from .optimization import (

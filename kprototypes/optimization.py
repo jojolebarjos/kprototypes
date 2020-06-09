@@ -21,7 +21,51 @@ def fit(
     random_state,
     verbose,
 ):
-    """Two-step optimization."""
+    """Fit centroids.
+
+    This implementation follows the standard k-means algorithm, also referred
+    to as Lloyd's algorithm. The optimization proceeds by alternating between
+    two steps:
+    
+     1. assignment step, where each sample is assigned to the closest
+        centroid;
+
+     2. update step, where centroids are recomputed based on the assignment.
+
+    This approach differs from the original paper, where centroids are updated
+    after each individual assignment.
+
+    Parameters
+    ----------
+    numerical_values: float32, n_samples x n_numerical_features
+        Numerical feature array.
+    categorical_values: int32, n_samples x n_categorical_features
+        Categorical feature array.
+    numerical_centroids: float32, n_clusters x n_numerical_features
+        Numerical centroid array.
+    categorical_centroids: int32, n_clusters x n_categorical_features
+        Categorical centroid array.
+    numerical_distance: callable
+        Distance function used for numerical features.
+    categorical_distance: callable
+        Distance function used for categorical features.
+    gamma: float32
+        Categorical distance weight.
+    n_iterations: int32
+        Maximum number of iterations.
+    random_state: numpy.random.RandomState
+        Random state used to initialize centroids.
+    verbose: int32
+        Verbosity level (0 for no output).
+
+    Returns
+    -------
+    clustership: int32, n_samples
+        Closest clusers.
+    cost: float32
+        Loss after last iteration.
+
+    """
     
     n_points, n_categorical_features = categorical_values.shape
     n_clusters, _  = numerical_centroids.shape
@@ -101,7 +145,35 @@ def predict(
     gamma,
     return_cost=False,
 ):
-    """Assign points to closest clusters."""
+    """Assign points to closest clusters.
+
+    Parameters
+    ----------
+    numerical_values: float32, n_samples x n_numerical_features
+        Numerical feature array.
+    categorical_values: int32, n_samples x n_categorical_features
+        Categorical feature array.
+    numerical_centroids: float32, n_clusters x n_numerical_features
+        Numerical centroid array.
+    categorical_centroids: int32, n_clusters x n_categorical_features
+        Categorical centroid array.
+    numerical_distance: callable
+        Distance function used for numerical features.
+    categorical_distance: callable
+        Distance function used for categorical features.
+    gamma: float32
+        Categorical distance weight.
+    return_cost: bool, optional
+        Whether to return cost.
+
+    Returns
+    -------
+    clustership: int32, n_samples
+        Closest clusers.
+    cost: float32
+        Loss after last iteration, if ``return_cost`` is true.
+
+    """
 
     n_points, _ = numerical_values.shape
 

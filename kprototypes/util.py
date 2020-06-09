@@ -8,6 +8,8 @@ UNKNOWN = object()
 
 
 class SingleCategoricalTransformer:
+    """Transform a single column."""
+
     def __init__(self, *, min_count=0, allow_unknown=True, nan_as_unknown=True):
 
         # Keep parameters
@@ -79,11 +81,30 @@ class SingleCategoricalTransformer:
 
 
 class CategoricalTransformer:
+    """Encode categorical values as integers.
+
+    Each column has its own vocabulary. Values are mapped from 0 to N - 1,
+    where N is the size of the vocabulary.
+
+    Parameters
+    ----------
+    min_count: int, optional
+        Ignore values that appears less than a given number of times. Unknown
+        values must be enabled as well.
+    allow_unknown: bool, optional
+        Add an additional value for unexpected or unknown values.
+    nan_as_unknown: bool, optional
+        Treat NaN as unknown, instead of allocating a dedicated index.
+
+    """
+
     def __init__(self, **kwargs):
         self._kwargs = kwargs
         self._transformers = []
 
     def fit(self, values):
+        """Build index."""
+
         _, n_columns = values.shape
         transformers = []
         for i in range(n_columns):
@@ -94,15 +115,21 @@ class CategoricalTransformer:
         return self
 
     def fit_transform(self, values):
+        """Build index and transform values."""
+
         self.fit(values)
         return self.transform(values)
 
     def transform(self, values):
+        """Transform values."""
+
         indices = [t.transform(values[:, i]) for i, t in enumerate(self._transformers)]
         indices = np.stack(indices, axis=1)
         return indices
 
     def inverse_transform(self, indices):
+        """Convert indices back to values."""
+
         values = [t.inverse_transform(indices[:, i]) for i, t in enumerate(self._transformers)]
         values = np.stack(values, axis=1)
         return values

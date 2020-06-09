@@ -3,6 +3,25 @@ import numpy as np
 
 
 def check_initialization(initialization):
+    """Resolve initialization function.
+
+    If ``distance`` is a string, only ``"random"`` and ``"frequency"`` are
+    accepted. If it is a callable, then is is return as-is. If it is ``None``,
+    it defaults to ``"random"``.
+
+    Directly specifying centroids as a tuple of arrays is also accepted.
+
+    Returns
+    -------
+    function: callable
+        Centroid initialization function.
+
+    See Also
+    --------
+    :meth:`random_initialization`, :meth:`frequency_initialization`
+
+    """
+
     if initialization is None:
         return random_initialization
     if callable(initialization):
@@ -56,6 +75,13 @@ def random_initialization(
     Used in "Clustering large data sets with mixed numeric and categorical
     values" by Huang (1997), the original k-prototypes definition.
 
+    Returns
+    -------
+    numerical_centroids: float32, n_clusters x n_numerical_features
+        Numerical centroid array.
+    categorical_centroids: int32, n_clusters x n_categorical_features
+        Categorical centroid array.
+
     """
 
     n_points, _ = numerical_values.shape
@@ -78,7 +104,7 @@ def random_initialization(
 def _numerical_density_sklearn(values):
     """Estimate probability density function using gaussian kernel.
 
-    Requires `scikit-learn`.
+    Requires ``scikit-learn``.
 
     """
     
@@ -96,8 +122,8 @@ def _numerical_density_sklearn(values):
 def _numerical_density_fastkde(values):
     """Estimate probability density function using a fast approximation.
 
-    Requires `fastKDE`, as proposed by O'Brien et al. in "A fast and objective
-    multidimensional kernel density estimation method: fastKDE".
+    Requires ``fastKDE``, as proposed by O'Brien et al. in "A fast and
+    objective multidimensional kernel density estimation method: fastKDE".
 
     """
 
@@ -143,10 +169,20 @@ def frequency_initialization(
 ):
     """Frequency-based initialization.
 
-    ...
+    Choose centroids from points, based on probability distributions of each
+    feature. The first centroid is selected at highest density point. Then, the
+    remaining centroids are selected to be both far from current centroids and
+    at dense locations.
 
     This is an extension for mixed values of "A new initialization method for
     categorical data clustering" by Cao et al. (2009).
+
+    Returns
+    -------
+    numerical_centroids: float32, n_clusters x n_numerical_features
+        Numerical centroid array.
+    categorical_centroids: int32, n_clusters x n_categorical_features
+        Categorical centroid array.
 
     """
 
@@ -165,7 +201,6 @@ def frequency_initialization(
     )
 
     # Estimate probability of each sample and each feature
-    # TODO should maybe stick to log-space for stability?
     densities = np.concatenate([
         _numerical_density(numerical_values),
         _categorical_density(categorical_values)

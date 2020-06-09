@@ -11,7 +11,44 @@ from .optimization import fit, predict
 class KPrototypes:
     """K-Prototypes clustering.
 
-    ...
+    The k-prototypes algorithm, as described in "Clustering large data sets
+    with mixed numeric and categorical values" by Huang (1997), is an extension
+    of k-means for mixed data.
+
+    This wrapper loosely follows Scikit-Learn conventions for clustering
+    estimators, as it provide the usual ``fit``  and ``predict`` methods.
+    However, the signature is different, as it expects numerical and
+    categorical data to be provided in separated arrays.
+
+    See Also
+    --------
+    :meth:`fit`, :meth:`predict`
+
+    Attributes
+    ----------
+    initialization: callable
+        Centroid initialization function.
+    numerical_distance: callable
+        Distance function used for numerical features.
+    categorical_distance: callable
+        Distance function used for categorical features.
+    gamma: float32
+        Categorical distance weight.
+    n_clusters: int32
+        Number of clusters.
+    n_iterations: int32
+        Maximum number of iterations.
+    verbose: bool
+        Verbosity level (0 for no output).
+    true_gamma: float32
+        Categorical distance weight inferred from data, if gamma was not
+        specified.
+    numerical_centroids: float32, n_clusters x n_numerical_features
+        Numerical centroid array.
+    categorical_centroids: int32, n_clusters x n_categorical_features
+        Categorical centroid array.
+    cost: float32
+        Loss after last training iteration.
 
     """
 
@@ -47,12 +84,41 @@ class KPrototypes:
         self.cost = None
 
     def fit(self, numerical_values, categorical_values):
+        """Fit centroids.
+
+        Parameters
+        ----------
+        numerical_values: float32, n_samples x n_numerical_features
+            Numerical feature array.
+        categorical_values: int32, n_samples x n_categorical_features
+            Categorical feature array.
+
+        Returns
+        -------
+        self: object
+
+        """
 
         # Regular fit, discarding cluster assignment
         self.fit_predict(numerical_values, categorical_values)
         return self
 
     def fit_predict(self, numerical_values, categorical_values):
+        """Fit centroids and assign points to closest clusters.
+
+        Parameters
+        ----------
+        numerical_values: float32, n_samples x n_numerical_features
+            Numerical feature array.
+        categorical_values: int32, n_samples x n_categorical_features
+            Categorical feature array.
+
+        Returns
+        -------
+        clustership: int32, n_samples
+            Closest clusers.
+
+        """
 
         # Check input
         # TODO maybe ensure_min_features=0?
@@ -109,6 +175,21 @@ class KPrototypes:
         return clustership
 
     def predict(self, numerical_values, categorical_values):
+        """Assign points to closest clusters.
+
+        Parameters
+        ----------
+        numerical_values: float32, n_samples x n_numerical_features
+            Numerical feature array.
+        categorical_values: int32, n_samples x n_categorical_features
+            Categorical feature array.
+
+        Returns
+        -------
+        clustership: int32, n_samples
+            Closest clusers.
+
+        """
 
         return predict(
             numerical_values,
