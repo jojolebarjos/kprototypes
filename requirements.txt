@@ -1,8 +1,5 @@
-cython
-fastkde
 numba
 numpy
 scikit-learn
-scipy
 sphinx
 sphinx-rtd-theme
