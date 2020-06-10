@@ -1,4 +1,3 @@
-
 import numpy as np
 
 
@@ -20,11 +19,11 @@ def check_distance(distance):
         return euclidean_distance
     if callable(distance):
         return distance
-    if distance == 'euclidean':
+    if distance == "euclidean":
         return euclidean_distance
-    if distance == 'manhattan':
+    if distance == "manhattan":
         return manhattan_distance
-    if distance == 'matching':
+    if distance == "matching":
         return matching_distance
     raise KeyError(distance)
 

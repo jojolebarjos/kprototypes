@@ -1,4 +1,3 @@
-
 from .distance import (
     check_distance,
     euclidean_distance,
@@ -17,9 +16,7 @@ from .optimization import (
     predict,
 )
 
-from .model import (
-    KPrototypes,
-)
+from .model import KPrototypes
 
 from .util import (
     SingleCategoricalTransformer,

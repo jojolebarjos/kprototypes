@@ -1,4 +1,3 @@
-
 from collections import Counter
 
 import numpy as np
@@ -14,9 +13,7 @@ class SingleCategoricalTransformer:
 
         # Keep parameters
         if min_count > 0 and not allow_unknown:
-            raise ValueError(
-                "Cannot use min_count when unknown values are forbidden"
-            )
+            raise ValueError("Cannot use min_count when unknown values are forbidden")
         self.min_count = min_count
         self.allow_unknown = allow_unknown
         self.nan_as_unknown = nan_as_unknown
@@ -53,11 +50,14 @@ class SingleCategoricalTransformer:
 
         # Define mapping function
         if self.allow_unknown:
+
             def _map(value):
                 if value != value:
                     value = np.nan
                 return mapping.get(value, 0)
+
         else:
+
             def _map(value):
                 if value != value:
                     value = np.nan
@@ -130,6 +130,8 @@ class CategoricalTransformer:
     def inverse_transform(self, indices):
         """Convert indices back to values."""
 
-        values = [t.inverse_transform(indices[:, i]) for i, t in enumerate(self._transformers)]
+        values = [
+            t.inverse_transform(indices[:, i]) for i, t in enumerate(self._transformers)
+        ]
         values = np.stack(values, axis=1)
         return values

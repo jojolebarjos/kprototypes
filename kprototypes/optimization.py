@@ -1,4 +1,3 @@
-
 import numpy as np
 
 
@@ -66,9 +65,9 @@ def fit(
         Loss after last iteration.
 
     """
-    
+
     n_points, n_categorical_features = categorical_values.shape
-    n_clusters, _  = numerical_centroids.shape
+    n_clusters, _ = numerical_centroids.shape
 
     # TODO maybe allow keyboard interrupt?
 
@@ -93,8 +92,8 @@ def fit(
         if old_clustership is not None:
             moves = (old_clustership != clustership).sum()
             if verbose > 0:
-                print(f'#{iteration}: cost={cost}, moves={moves}')
-            if moves == 0: # TODO abort if cost > old_cost?
+                print(f"#{iteration}: cost={cost}, moves={moves}")
+            if moves == 0:  # TODO abort if cost > old_cost?
                 break
 
         # Count points in each cluster
@@ -120,7 +119,7 @@ def fit(
                 # Numerical centroid attributes are set to mean
                 masked_numerical_values = numerical_values[mask]
                 numerical_centroids[k] = masked_numerical_values.sum(axis=0) / count
-                
+
                 # Categorical centroid attributes are set to most frequent value
                 masked_categorical_values = categorical_values[mask]
                 for j in range(n_categorical_features):
@@ -130,8 +129,8 @@ def fit(
     # Report non-convergence
     else:
         if verbose > 0:
-            print(f'Optimization did not converge after {n_iterations} iterations')
-    
+            print(f"Optimization did not converge after {n_iterations} iterations")
+
     return clustership, cost
 
 
@@ -178,8 +177,12 @@ def predict(
     n_points, _ = numerical_values.shape
 
     # Compute weighted distances
-    numerical_costs = numerical_distance(numerical_centroids[None, :], numerical_values[:, None])
-    categorical_costs = categorical_distance(categorical_centroids[None, :], categorical_values[:, None])
+    numerical_costs = numerical_distance(
+        numerical_centroids[None, :], numerical_values[:, None]
+    )
+    categorical_costs = categorical_distance(
+        categorical_centroids[None, :], categorical_values[:, None]
+    )
     costs = numerical_costs + gamma * categorical_costs
 
     # Assign to closest clusters

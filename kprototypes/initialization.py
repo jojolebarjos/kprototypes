@@ -1,4 +1,3 @@
-
 import numpy as np
 
 
@@ -26,9 +25,9 @@ def check_initialization(initialization):
         return random_initialization
     if callable(initialization):
         return initialization
-    if initialization == 'random':
+    if initialization == "random":
         return random_initialization
-    if initialization == 'frequency':
+    if initialization == "frequency":
         return frequency_initialization
     if isinstance(initialization, (tuple, list)):
         assert len(initialization) == 2
@@ -107,9 +106,9 @@ def _numerical_density_sklearn(values):
     Requires ``scikit-learn``.
 
     """
-    
+
     from sklearn.neighbors import KernelDensity
-    
+
     v = values[:, None]
     kde = KernelDensity()
     # TODO randomly subsample if too large?
@@ -134,7 +133,7 @@ def _numerical_density_fastkde(values):
     return densities
 
 
-def _numerical_density(values, method='fast'):
+def _numerical_density(values, method="fast"):
     """Estimate density of a continous random variable."""
 
     n_points, n_features = values.shape
@@ -192,19 +191,20 @@ def frequency_initialization(
 
     # Allocate centroid arrays
     numerical_centroids = np.empty(
-        (n_clusters, n_numerical_features),
-        dtype=numerical_values.dtype,
+        (n_clusters, n_numerical_features), dtype=numerical_values.dtype,
     )
     categorical_centroids = np.empty(
-        (n_clusters, n_categorical_features),
-        dtype=categorical_values.dtype,
+        (n_clusters, n_categorical_features), dtype=categorical_values.dtype,
     )
 
     # Estimate probability of each sample and each feature
-    densities = np.concatenate([
-        _numerical_density(numerical_values),
-        _categorical_density(categorical_values)
-    ], axis=1)
+    densities = np.concatenate(
+        [
+            _numerical_density(numerical_values),
+            _categorical_density(categorical_values),
+        ],
+        axis=1,
+    )
 
     # Mean density is used as weight
     weights = densities.mean(axis=1)
@@ -219,12 +219,10 @@ def frequency_initialization(
 
         # Compute distance w.r.t. already initialized centroids
         numerical_costs = numerical_distance(
-            numerical_values[:, None],
-            numerical_centroids[None, :k]
+            numerical_values[:, None], numerical_centroids[None, :k]
         )
         categorical_costs = categorical_distance(
-            categorical_values[:, None],
-            categorical_centroids[None, :k]
+            categorical_values[:, None], categorical_centroids[None, :k]
         )
         costs = numerical_costs + gamma * categorical_costs
 

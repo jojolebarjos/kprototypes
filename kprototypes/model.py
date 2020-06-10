@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from sklearn.utils import check_array, check_random_state
@@ -52,7 +51,8 @@ class KPrototypes:
 
     """
 
-    def __init__(self,
+    def __init__(
+        self,
         n_clusters=8,
         initialization=None,
         numerical_distance=None,
@@ -76,7 +76,7 @@ class KPrototypes:
         self.n_clusters = int(n_clusters)
         self.n_iterations = int(n_iterations)
         self.verbose = bool(verbose)
-        
+
         # Parameters are not yet fitted
         self.true_gamma = None
         self.numerical_centroids = None
@@ -123,12 +123,10 @@ class KPrototypes:
         # Check input
         # TODO maybe ensure_min_features=0?
         numerical_values = check_array(
-            numerical_values,
-            dtype=[np.float32, np.float64],
+            numerical_values, dtype=[np.float32, np.float64],
         )
         categorical_values = check_array(
-            categorical_values,
-            dtype=[np.int32, np.int64],
+            categorical_values, dtype=[np.int32, np.int64],
         )
 
         # Estimate gamma, if not specified
