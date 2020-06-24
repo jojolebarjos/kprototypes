@@ -1,7 +1,7 @@
 
 # K-prototypes
 
-K-prototypes, as introduced by [Huang (1997)](#1), is an extension to the
+K-prototypes, as introduced by [Huang (1997)](#ref1), is an extension to the
 k-means algorithm, which handles mixed numerical and categorical data.
 
 Also, for completeness, note that a well-known Python implementation is
@@ -33,19 +33,19 @@ pip install matplotlib umap-learn
 ## References
 
 <ol>
-    <li id="1">
+    <li><a name="ref1"></a>
         Clustering large data sets with mixed numeric and categorical values,
         1997, Zhexue Huang
     </li>
-    <li id="2">
+    <li><a name="ref2"></a>
         Extensions to the k-modes algorithm for clustering large data sets with
         categorical values, 1998, Zhexue Huang
     </li>
-    <li id="3">
+    <li><a name="ref3"></a>
         A new initialization method for categorical data clustering, 2009,
         Fuyuan Cao, Jiye Liang, Liang Bai
     </li>
-    <li id="4">
+    <li><a name="ref4"></a>
         A Novel Cluster Center Initialization Method for the k-Prototypes
         Algorithms using Centrality and Distance, 2015, Jinchao Ji, Wei Pang,
         Yanlin Zheng, Zhe Wang, Zhiqiang Ma and Libiao Zhang
