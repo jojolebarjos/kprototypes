@@ -23,6 +23,12 @@ pip install cython numpy scipy
 pip install fastkde
 ```
 
+Some examples require [UMAP](https://github.com/lmcinnes/umap) for dimensionality reduction and [matplotlib](https://matplotlib.org/) for rendering:
+
+```
+pip install matplotlib umap-learn
+```
+
 
 ## References
 
