@@ -32,7 +32,7 @@ def euclidean_distance(a, b):
     """Squared euclidean distance.
 
     This is the sum of squared differences for each feature pair, also known as
-    squared L\ :sub:`2` norm.
+    squared L\\ :sub:`2` norm.
 
     Example
     --------
@@ -50,7 +50,7 @@ def manhattan_distance(a, b):
     """Manhattan distance.
 
     This is the sum of absolute differences for each feature pair, also known
-    as L\ :sub:`1` norm.
+    as L\\ :sub:`1` norm.
 
     Example
     --------
