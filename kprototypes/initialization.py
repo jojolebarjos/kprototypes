@@ -1,5 +1,7 @@
 import numpy as np
 
+from sklearn.utils import check_array
+
 
 def check_initialization(initialization):
     """Resolve initialization function.
@@ -38,7 +40,18 @@ def check_initialization(initialization):
 def _explicit_initialization_factory(numerical_centroids, categorical_centroids):
     """Create dummy initialization method, returning precomputed centroids."""
 
-    # TODO check dtype and shape
+    # Check types, and copy arrays
+    numerical_centroids = check_array(
+        numerical_centroids, dtype=[np.float32, np.float64], copy=True,
+    )
+    categorical_centroids = check_array(
+        categorical_centroids, dtype=[np.int32, np.int64], copy=True,
+    )
+
+    # Check shape
+    assert len(numerical_centroids.shape) == 2
+    assert len(categorical_centroids.shape) == 2
+    assert numerical_centroids.shape[0] == categorical_centroids.shape[0]
 
     def initialization(
         numerical_values,
@@ -50,8 +63,15 @@ def _explicit_initialization_factory(numerical_centroids, categorical_centroids)
         random_state,
         verbose,
     ):
-        assert numerical_centroids.shape[1] == n_clusters
-        assert categorical_centroids.shape[1] == n_clusters
+
+        # Check number of cluster
+        assert numerical_centroids.shape[0] == n_clusters
+        assert categorical_centroids.shape[0] == n_clusters
+
+        # Check number of features
+        assert numerical_centroids.shape[1] == numerical_values.shape[1]
+        assert categorical_centroids.shape[1] == categorical_values.shape[1]
+
         return numerical_centroids, categorical_centroids
 
     return initialization
@@ -84,6 +104,7 @@ def random_initialization(
     """
 
     n_points, _ = numerical_values.shape
+    assert n_points == categorical_values.shape[0]
     assert n_points >= n_clusters
 
     # TODO need to discard duplicates?
@@ -187,6 +208,7 @@ def frequency_initialization(
 
     n_points, n_numerical_features = numerical_values.shape
     _, n_categorical_features = categorical_values.shape
+    assert n_points == categorical_values.shape[0]
     assert n_points >= n_clusters
 
     # Allocate centroid arrays
