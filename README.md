@@ -16,13 +16,6 @@ Install from source, to ensure latest version:
 pip install git+https://gitlab.com/jojolebarjos/kprototypes.git
 ```
 
-`fastkde` is an optional dependencies, required by the frequency-based initialization:
-
-```
-pip install cython numpy scipy
-pip install fastkde
-```
-
 Some examples require [UMAP](https://github.com/lmcinnes/umap) for dimensionality reduction and [matplotlib](https://matplotlib.org/) for rendering:
 
 ```
