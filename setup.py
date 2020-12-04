@@ -47,7 +47,7 @@ setup(
     ],
 
     install_requires = [
-        # "fastkde", # TODO wait until broken setup is solved
+        "fastkde",
         "numba",
         "numpy",
         "scikit-learn",

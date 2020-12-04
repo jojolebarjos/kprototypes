@@ -55,6 +55,9 @@ pip install matplotlib umap-learn
 
 ## Changelog
 
+ * 0.1.2 - 2020-12-04
+    * Add proper documentation
+    * Small fixes
  * 0.1.1 - 2020-06-03
     * Add clean initialization procedures
  * 0.1.0 - 2020-05-04
