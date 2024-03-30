@@ -22,3 +22,5 @@ from .util import (
     SingleCategoricalTransformer,
     CategoricalTransformer,
 )
+
+__version__ = "0.1.3"

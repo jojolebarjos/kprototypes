@@ -42,10 +42,14 @@ def _explicit_initialization_factory(numerical_centroids, categorical_centroids)
 
     # Check types, and copy arrays
     numerical_centroids = check_array(
-        numerical_centroids, dtype=[np.float32, np.float64], copy=True,
+        numerical_centroids,
+        dtype=[np.float32, np.float64],
+        copy=True,
     )
     categorical_centroids = check_array(
-        categorical_centroids, dtype=[np.int32, np.int64], copy=True,
+        categorical_centroids,
+        dtype=[np.int32, np.int64],
+        copy=True,
     )
 
     # Check shape
@@ -63,7 +67,6 @@ def _explicit_initialization_factory(numerical_centroids, categorical_centroids)
         random_state,
         verbose,
     ):
-
         # Check number of cluster
         assert numerical_centroids.shape[0] == n_clusters
         assert categorical_centroids.shape[0] == n_clusters
@@ -149,7 +152,7 @@ def _numerical_density_fastkde(values):
 
     from fastkde import fastKDE
 
-    pdf, axe = fastKDE.pdf(values)
+    pdf, axe = fastKDE.pdf(values, use_xarray=False)
     densities = np.interp(values, axe, pdf, left=0, right=0)
     return densities
 
@@ -213,10 +216,12 @@ def frequency_initialization(
 
     # Allocate centroid arrays
     numerical_centroids = np.empty(
-        (n_clusters, n_numerical_features), dtype=numerical_values.dtype,
+        (n_clusters, n_numerical_features),
+        dtype=numerical_values.dtype,
     )
     categorical_centroids = np.empty(
-        (n_clusters, n_categorical_features), dtype=categorical_values.dtype,
+        (n_clusters, n_categorical_features),
+        dtype=categorical_values.dtype,
     )
 
     # Estimate probability of each sample and each feature
@@ -238,7 +243,6 @@ def frequency_initialization(
 
     # Then, choose the most dissimilar point at each step, with respect to current cluster set
     for k in range(1, n_clusters):
-
         # Compute distance w.r.t. already initialized centroids
         numerical_costs = numerical_distance(
             numerical_values[:, None], numerical_centroids[None, :k]

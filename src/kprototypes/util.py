@@ -10,7 +10,6 @@ class SingleCategoricalTransformer:
     """Transform a single column."""
 
     def __init__(self, *, min_count=0, allow_unknown=True, nan_as_unknown=True):
-
         # Keep parameters
         if min_count > 0 and not allow_unknown:
             raise ValueError("Cannot use min_count when unknown values are forbidden")
@@ -23,7 +22,6 @@ class SingleCategoricalTransformer:
         self._mapping = None
 
     def fit(self, values):
-
         # Count values, unifying NaN-likes
         counter = Counter()
         for value in values:

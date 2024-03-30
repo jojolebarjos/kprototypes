@@ -25,7 +25,7 @@ def fit(
     This implementation follows the standard k-means algorithm, also referred
     to as Lloyd's algorithm. The optimization proceeds by alternating between
     two steps:
-    
+
      1. assignment step, where each sample is assigned to the closest
         centroid;
 
@@ -115,7 +115,6 @@ def fit(
                 categorical_centroids[k] = categorical_values[point]
 
             else:
-
                 # Numerical centroid attributes are set to mean
                 masked_numerical_values = numerical_values[mask]
                 numerical_centroids[k] = masked_numerical_values.sum(axis=0) / count

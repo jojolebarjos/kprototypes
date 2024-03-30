@@ -62,7 +62,6 @@ class KPrototypes:
         random_state=None,
         verbose=0,
     ):
-
         # Resolve string-based properties
         self.initialization = check_initialization(initialization)
         self.numerical_distance = check_distance(numerical_distance)
@@ -123,10 +122,12 @@ class KPrototypes:
         # Check input
         # TODO maybe ensure_min_features=0?
         numerical_values = check_array(
-            numerical_values, dtype=[np.float32, np.float64],
+            numerical_values,
+            dtype=[np.float32, np.float64],
         )
         categorical_values = check_array(
-            categorical_values, dtype=[np.int32, np.int64],
+            categorical_values,
+            dtype=[np.int32, np.int64],
         )
 
         # Estimate gamma, if not specified

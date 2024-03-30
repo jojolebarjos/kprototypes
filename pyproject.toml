@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kprototypes"
+authors = [
+    {name = "Johan Berdat", email = "jojolebarjos@gmail.com"},
+]
+license = {text = "MIT License"}
+description = "k-prototypes for numerical and categorical clustering"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "fastkde",
+    "numba",
+    "numpy",
+    "scikit-learn",
+]
+keywords = [
+    "clustering",
+    "k-prototypes",
+    "k-means",
+    "k-modes",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/jojolebarjos/kprototypes.git"
+Issues = "https://github.com/jojolebarjos/kprototypes/issues"
+
+[tool.setuptools.dynamic]
+version = {attr = "kprototypes.__version__"}
+
+[tool.ruff]
+extend-include = ["*.ipynb"]
+target-version = "py38"
+line-length = 88
+
+[tool.ruff.lint]
+extend-select = [
+    "W605",   # pycodestyle: invalid-escape-sequence
+    "S102",   # flake8-bandit: exec-builtin
+    "INP",    # flake8-no-pep420
+    "PYI",    # flake8-pyi
+    "PT",     # flake8-pytest-style
+    "PGH",    # pygrep-hooks
+    "PL",     # Pylint
+    "NPY",    # NumPy-specific rules
+    "RUF",    # Ruff-specific rules
+]
+ignore = [
+    "NPY002", # numpy-legacy-random
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/**" = ["INP001"]
+"[!t][!e][!s][!t][!s]*/**" = ["PT"]

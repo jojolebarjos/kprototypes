@@ -13,7 +13,7 @@ available [here](https://github.com/nicodv/kmodes).
 Install from source, to ensure latest version:
 
 ```
-pip install git+https://gitlab.com/jojolebarjos/kprototypes.git
+pip install git+https://github.com/jojolebarjos/kprototypes.git
 ```
 
 Some examples require [UMAP](https://github.com/lmcinnes/umap) for dimensionality reduction and [matplotlib](https://matplotlib.org/) for rendering:
@@ -48,6 +48,8 @@ pip install matplotlib umap-learn
 
 ## Changelog
 
+ * 0.1.3 - 2024-03-30
+    * Migrated to GitHub
  * 0.1.2 - 2020-12-04
     * Add proper documentation
     * Small fixes

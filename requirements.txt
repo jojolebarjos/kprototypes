@@ -1,8 +1,13 @@
-fastkde>=1.0.16
-matplotlib>=3.1.2
-numba>=0.49.1
-numpy>=1.17.3
-scikit-learn>=0.22.2
-sphinx>=3.0.4
-sphinx-rtd-theme>=0.4.3
-umap-learn>=0.3.10
+-e .
+fastkde==2.0.1
+ipywidgets==8.1.2
+matplotlib==3.7.5
+notebook==7.1.2
+numba==0.58.1
+numpy==1.24.4
+pre-commit==3.5.0
+ruff==0.3.4
+scikit-learn==1.3.2
+Sphinx==7.1.2
+sphinx-rtd-theme==2.0.0
+umap-learn==0.5.5
